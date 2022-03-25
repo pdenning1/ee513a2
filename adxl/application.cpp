@@ -34,6 +34,6 @@ int main() {
    ADXL345 sensor(1,0x53);
    sensor.setResolution(ADXL345::NORMAL);
    sensor.setRange(ADXL345::PLUSMINUS_4_G);
-   sensor.displayPitchAndRoll();
+   sensor.displayPitchAndRoll(); 
    return 0;
 }
