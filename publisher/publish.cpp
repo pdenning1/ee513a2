@@ -4,8 +4,10 @@
 #include <fstream>
 #include <string.h>
 #include <MQTTClient.h>
+#include "ADXL345.h"
 #define  CPU_TEMP "/sys/class/thermal/thermal_zone0/temp"
 using namespace std;
+using namespace exploringRPi;
 
 //Please replace the following address with the address of your server
 #define ADDRESS    "tcp://192.168.1.14:1883"
@@ -25,6 +27,7 @@ float getCPUTemperature() {         //get the CPU temperature
    return (((float)cpuTemp)/1000);
 }
 
+
 int main(int argc, char* argv[]) {
    char str_payload[100];           //Set your max message size here
    MQTTClient client;
@@ -41,7 +44,15 @@ int main(int argc, char* argv[]) {
       cout << "Failed to connect, return code " << rc << endl;
       return -1;
    }
-   sprintf(str_payload, "{\"d\":{\"CPUTemp\": %f }}", getCPUTemperature());
+
+   // Code added to interface to ADXL345
+   ADXL345 theAdxl(1, 0x53);
+   theAdxl.setResolution(ADXL345::NORMAL);
+   theAdxl.setRange(ADXL345::PLUSMINUS_4_G);
+
+   sprintf(str_payload, "{\"d\":{\"CPUTemp\": %f, \"X Accel\": %h, \"Y Accel\": %h, \"Z Accel\": %h, \"Pitch\": %f, \"Roll\": %f }}",
+			 getCPUTemperature(), theAdxl.getAccelerationX(), theAdxl.getAccelerationY(), theAdxl.getAccelerationZ(),
+			theAdxl.getPitch(), theAdxl.getRoll());
    pubmsg.payload = str_payload;
    pubmsg.payloadlen = strlen(str_payload);
    pubmsg.qos = QOS;
