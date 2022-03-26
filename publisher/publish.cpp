@@ -3,6 +3,7 @@
 #include <sstream>
 #include <fstream>
 #include <string.h>
+#include <time.h>
 #include <MQTTClient.h>
 #include "ADXL345.h"
 #define  CPU_TEMP "/sys/class/thermal/thermal_zone0/temp"
@@ -19,6 +20,7 @@ using namespace exploringRPi;
 #define TIMEOUT    10000L
 
 #define TOPIC_TEMP      "ee513/CPUTemp"
+#define TOPIC_TIME	"ee513/Time"
 #define TOPIC_ACCLX      "ee513/AcclX"
 #define TOPIC_ACCLY      "ee513/AcclY"
 #define TOPIC_ACCLZ      "ee513/AcclZ"
@@ -33,6 +35,17 @@ float getCPUTemperature() {         //get the CPU temperature
    fs >> cpuTemp;
    fs.close();
    return (((float)cpuTemp)/1000);
+}
+
+
+// get the current time. Source: http://www.cplusplus.com/reference/ctime/localtime/
+void getTime(char *theTime){
+   time_t rawTime;
+   struct tm *timeInfo;
+
+   time(&rawTime);
+   timeInfo = localtime(&rawTime);
+   sprintf(theTime, "%s", asctime(timeInfo));
 }
 
 // helper function to generate a json payload from topic string and data string
@@ -100,6 +113,7 @@ int main(int argc, char* argv[]) {
    theAdxl.setRange(ADXL345::PLUSMINUS_4_G);
    theAdxl.readSensorState();
 
+   //for each topic, save data as string, generate json, and the publish message
    char acclX[20];
    sprintf(acclX, "%d", theAdxl.getAccelerationX());
    generateJson(str_payload, TOPIC_ACCLX, acclX);
@@ -129,6 +143,11 @@ int main(int argc, char* argv[]) {
    sprintf(temp, "%f", getCPUTemperature());
    generateJson(str_payload, TOPIC_TEMP, temp);
    publishMessage(str_payload, TOPIC_TEMP);
+
+   char theTime[30];
+   getTime(theTime);
+   generateJson(str_payload, TOPIC_TIME, theTime);
+   publishMessage(str_payload, TOPIC_TIME);
    
    return 0;
    // // create the payload
