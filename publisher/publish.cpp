@@ -35,11 +35,11 @@ float getCPUTemperature() {         //get the CPU temperature
 
 // helper function to generate a json payload from topic string and data string
 // data must first be converted to string form
-void generateJson(char* str_payload, char* topic, char* data) {
+void generateJson(char* str_payload, const char* topic, char* data) {
    sprintf(str_payload, "{\"d\":{\"%s\": %s }}", topic, data);
 }
 
-int publishMessage(char* str_payload, char* topic){
+int publishMessage(char* str_payload, const char* topic){
    // setup client and connect to broker
    MQTTClient client;
    MQTTClient_connectOptions opts = MQTTClient_connectOptions_initializer;
@@ -61,10 +61,10 @@ int publishMessage(char* str_payload, char* topic){
    pubmsg.payloadlen = strlen(str_payload);
    pubmsg.qos = QOS;
    pubmsg.retained = 0;
-   MQTTClient_publishMessage(client, TOPIC, &pubmsg, &token);
+   MQTTClient_publishMessage(client, topic, &pubmsg, &token);
    cout << "Waiting for up to " << (int)(TIMEOUT/1000) <<
         " seconds for publication of " << str_payload <<
-        " \non topic " << TOPIC << " for ClientID: " << CLIENTID << endl;
+        " \non topic " << topic << " for ClientID: " << CLIENTID << endl;
    rc = MQTTClient_waitForCompletion(client, token, TIMEOUT);
    cout << "Message with token " << (int)token << " delivered." << endl;
 
@@ -97,7 +97,11 @@ int main(int argc, char* argv[]) {
    theAdxl.setResolution(ADXL345::NORMAL);
    theAdxl.setRange(ADXL345::PLUSMINUS_4_G);
    theAdxl.readSensorState();
-
+   
+   char roll[20];
+   sprintf(roll, "%f", theAdxl.getRoll());
+   generateJson(str_payload, TOPIC_ROLL, roll);
+   publishMessage(str_payload, TOPIC_ROLL);
 
    char temp[20];
    sprintf(temp, "%f", getCPUTemperature());
