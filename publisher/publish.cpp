@@ -49,8 +49,9 @@ int main(int argc, char* argv[]) {
    ADXL345 theAdxl(1, 0x53);
    theAdxl.setResolution(ADXL345::NORMAL);
    theAdxl.setRange(ADXL345::PLUSMINUS_4_G);
+   theAdxl.readSensorState();
 
-   sprintf(str_payload, "{\"d\":{\"CPUTemp\": %f, \"X Accel\": %h, \"Y Accel\": %h, \"Z Accel\": %h, \"Pitch\": %f, \"Roll\": %f }}",
+   sprintf(str_payload, "{\"d\":{\"CPUTemp\": %f, \"X Accel\": %d, \"Y Accel\": %d, \"Z Accel\": %d, \"Pitch\": %f, \"Roll\": %f }}",
 			 getCPUTemperature(), theAdxl.getAccelerationX(), theAdxl.getAccelerationY(), theAdxl.getAccelerationZ(),
 			theAdxl.getPitch(), theAdxl.getRoll());
    pubmsg.payload = str_payload;
