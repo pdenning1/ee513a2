@@ -19,9 +19,11 @@ using namespace exploringRPi;
 #define TIMEOUT    10000L
 
 #define TOPIC_TEMP      "ee513/CPUTemp"
-#define TOPIC_ACCL "ee513/Accl"
-#define TOPIC_ROLL "ee513/Roll"
-#define TOPIC_PITCH "ee513/Pitch"
+#define TOPIC_ACCLX      "ee513/AcclX"
+#define TOPIC_ACCLY      "ee513/AcclY"
+#define TOPIC_ACCLZ      "ee513/AcclZ"
+#define TOPIC_ROLL      "ee513/Roll"
+#define TOPIC_PITCH     "ee513/Pitch"
 
 
 float getCPUTemperature() {         //get the CPU temperature
@@ -97,18 +99,38 @@ int main(int argc, char* argv[]) {
    theAdxl.setResolution(ADXL345::NORMAL);
    theAdxl.setRange(ADXL345::PLUSMINUS_4_G);
    theAdxl.readSensorState();
+
+   char acclX[20];
+   sprintf(acclX, "%d", theAdxl.getAccelerationX());
+   generateJson(str_payload, TOPIC_ACCLX, acclX);
+   publishMessage(str_payload, TOPIC_ACCLX);
+
+   char acclY[20];
+   sprintf(acclY, "%d", theAdxl.getAccelerationY());
+   generateJson(str_payload, TOPIC_ACCLY, acclY);
+   publishMessage(str_payload, TOPIC_ACCLY);
+
+   char acclZ[20];
+   sprintf(acclZ, "%d", theAdxl.getAccelerationZ());
+   generateJson(str_payload, TOPIC_ACCLZ, acclZ);
+   publishMessage(str_payload, TOPIC_ACCLZ);
    
    char roll[20];
    sprintf(roll, "%f", theAdxl.getRoll());
    generateJson(str_payload, TOPIC_ROLL, roll);
    publishMessage(str_payload, TOPIC_ROLL);
 
+   char pitch[20];
+   sprintf(pitch, "%f", theAdxl.getPitch());
+   generateJson(str_payload, TOPIC_PITCH, pitch);
+   publishMessage(str_payload, TOPIC_PITCH);
+
    char temp[20];
    sprintf(temp, "%f", getCPUTemperature());
    generateJson(str_payload, TOPIC_TEMP, temp);
    publishMessage(str_payload, TOPIC_TEMP);
    
-
+   return 0;
    // // create the payload
    // sprintf(str_payload, "{\"d\":{\"CPUTemp\": %f, \"X Accel\": %d, \"Y Accel\": %d, \"Z Accel\": %d, \"Pitch\": %f, \"Roll\": %f }}",
 	// 		 getCPUTemperature(), theAdxl.getAccelerationX(), theAdxl.getAccelerationY(), theAdxl.getAccelerationZ(),
