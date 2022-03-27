@@ -33,16 +33,21 @@ namespace ee513a2{
 
 Publish::Publish(){
    // setup client and connect to broker
-   this->opts = MQTTClient_connectOptions_initializer;
+   this->conn_opts = MQTTClient_connectOptions_initializer;
+   this->will_opts = MQTTClient_willOptions_initializer; // adding LWT
    this->pubmsg = MQTTClient_message_initializer;
    //MQTTClient_deliveryToken token;
    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-   opts.keepAliveInterval = 20;
-   opts.cleansession = 1;
-   opts.username = AUTHMETHOD;
-   opts.password = AUTHTOKEN;
+   conn_opts.keepAliveInterval = 20;
+   conn_opts.cleansession = 1;
+   conn_opts.username = AUTHMETHOD;
+   conn_opts.password = AUTHTOKEN;
+   conn_opts.will = &will_opts;
+   will_opts.topicName = TOPIC_TEMP;
+   will_opts.message = "the MQTT publisher client rpi1 has lost connection";
+   will_opts.qos = QOS;
    int rc;
-   if ((rc = MQTTClient_connect(client, &opts)) != MQTTCLIENT_SUCCESS) {
+   if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
       cout << "Failed to connect, return code " << rc << endl;
       return;
    }
@@ -78,6 +83,7 @@ void Publish::getTime(char *theTime){
    time(&rawTime);
    timeInfo = localtime(&rawTime);
    sprintf(theTime, "%s", asctime(timeInfo));
+   theTime[24] = 0; // the string has a newline char here [24], so change to null
 }
 
 // helper function to generate a json payload from topic string and data string
