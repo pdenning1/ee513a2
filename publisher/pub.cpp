@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     thePublisher.publishAll();
 
     int count = 0;
-    int iterations = 5;
+    int iterations = 3;
     while(count < iterations){
         sleep(5);
         thePublisher.publishAll();
