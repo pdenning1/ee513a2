@@ -35,7 +35,7 @@ private:
    MQTTClient_connectOptions opts;
    MQTTClient_message pubmsg;
    MQTTClient_deliveryToken token;
-   ADXL345 theAdxl;
+   ADXL345* theAdxl;
 
    char str_payload[100];
 

@@ -1,14 +1,14 @@
 // // Based on the Paho C code example from www.eclipse.orgpaho
-// #include <iostream>
-// #include <sstream>
-// #include <fstream>
-// #include <string.h>
-// #include <time.h>
-// #include <MQTTClient.h>
-// #include "ADXL345.h"
-// #define  CPU_TEMP "/sys/class/thermal/thermal_zone0/temp"
-// using namespace std;
-// using namespace exploringRPi;
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string.h>
+#include <time.h>
+#include <MQTTClient.h>
+#include "ADXL345.h"
+#define  CPU_TEMP "/sys/class/thermal/thermal_zone0/temp"
+using namespace std;
+using namespace exploringRPi;
 
 // //Please replace the following address with the address of your server
 // #define ADDRESS    "tcp://192.168.1.14:1883"
@@ -27,14 +27,15 @@
 // #define TOPIC_ROLL      "ee513/Roll"
 // #define TOPIC_PITCH     "ee513/Pitch"
 
-include "publish.h"
+#include "publish.h"
 
+namespace ee513a2{
 
 Publish::Publish(){
    // setup client and connect to broker
-   MQTTClient_connectOptions opts = MQTTClient_connectOptions_initializer;
-   MQTTClient_message pubmsg = MQTTClient_message_initializer;
-   MQTTClient_deliveryToken token;
+   this->opts = MQTTClient_connectOptions_initializer;
+   this->pubmsg = MQTTClient_message_initializer;
+   //MQTTClient_deliveryToken token;
    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
    opts.keepAliveInterval = 20;
    opts.cleansession = 1;
@@ -43,13 +44,13 @@ Publish::Publish(){
    int rc;
    if ((rc = MQTTClient_connect(client, &opts)) != MQTTCLIENT_SUCCESS) {
       cout << "Failed to connect, return code " << rc << endl;
-      return -1;
+      return;
    }
 
    // setup the ADXL345
-   theAdxl = ADLX345(1, 0x53);
-   theAdxl.setResolution(ADXL345::NORMAL);
-   theAdxl.setRange(ADXL345::PLUSMINUS_4_G);
+   theAdxl = new ADXL345(1, 0x53);
+   theAdxl->setResolution(ADXL345::NORMAL);
+   theAdxl->setRange(ADXL345::PLUSMINUS_4_G);
 }
 
 Publish::~Publish(){
@@ -103,6 +104,7 @@ int Publish::publishMessage(char* str_payload, const char* topic){
    // }
 
    // create and send the message, wait for completion
+   int rc;
    pubmsg.payload = str_payload;
    pubmsg.payloadlen = strlen(str_payload);
    pubmsg.qos = QOS;
@@ -150,31 +152,31 @@ void Publish::disconnect(){
    // theAdxl.setRange(ADXL345::PLUSMINUS_4_G);
 
 void Publish::publishAll(){
-   theAdxl.readSensorState();
+   theAdxl->readSensorState();
 
    //for each topic, save data as string, generate json, and the publish message
    char acclX[20];
-   sprintf(acclX, "%d", theAdxl.getAccelerationX());
+   sprintf(acclX, "%d", theAdxl->getAccelerationX());
    generateJson(str_payload, TOPIC_ACCLX, acclX);
    publishMessage(str_payload, TOPIC_ACCLX);
 
    char acclY[20];
-   sprintf(acclY, "%d", theAdxl.getAccelerationY());
+   sprintf(acclY, "%d", theAdxl->getAccelerationY());
    generateJson(str_payload, TOPIC_ACCLY, acclY);
    publishMessage(str_payload, TOPIC_ACCLY);
 
    char acclZ[20];
-   sprintf(acclZ, "%d", theAdxl.getAccelerationZ());
+   sprintf(acclZ, "%d", theAdxl->getAccelerationZ());
    generateJson(str_payload, TOPIC_ACCLZ, acclZ);
    publishMessage(str_payload, TOPIC_ACCLZ);
    
    char roll[20];
-   sprintf(roll, "%f", theAdxl.getRoll());
+   sprintf(roll, "%f", theAdxl->getRoll());
    generateJson(str_payload, TOPIC_ROLL, roll);
    publishMessage(str_payload, TOPIC_ROLL);
 
    char pitch[20];
-   sprintf(pitch, "%f", theAdxl.getPitch());
+   sprintf(pitch, "%f", theAdxl->getPitch());
    generateJson(str_payload, TOPIC_PITCH, pitch);
    publishMessage(str_payload, TOPIC_PITCH);
 
@@ -211,4 +213,5 @@ void Publish::publishAll(){
    // MQTTClient_disconnect(client, 10000);
    // MQTTClient_destroy(&client);
    // return rc;
-}
+//}
+} // namesapce ee513a2
