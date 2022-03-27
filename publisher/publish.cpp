@@ -16,7 +16,7 @@ using namespace exploringRPi;
 #define AUTHMETHOD "pdenn"
 #define AUTHTOKEN  "123456"
 #define TOPIC      "ee513/CPUTemp"
-#define QOS        1
+#define QOS        0
 #define TIMEOUT    10000L
 
 #define TOPIC_TEMP      "ee513/CPUTemp"
