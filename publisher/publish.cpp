@@ -44,7 +44,7 @@ Publish::Publish(){
    conn_opts.password = AUTHTOKEN;
    conn_opts.will = &will_opts;
    will_opts.topicName = TOPIC_TEMP;
-   will_opts.message = "the MQTT publisher client rpi1 has lost connection";
+   will_opts.message = "{\"d\":{\"ee513/CPUTemp\": \"Client rpi1 lost connection\" }}";
    will_opts.qos = QOS;
    int rc;
    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
