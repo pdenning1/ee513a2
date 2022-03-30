@@ -2,6 +2,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "MQTTClient.h"
+#include <json-c/json.h>
 
 #define ADDRESS     "tcp://192.168.1.14:1883"
 #define CLIENTID    "rpi2"
@@ -30,11 +31,13 @@ void delivered(void *context, MQTTClient_deliveryToken dt) {
 int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message) {
     int i;
     char* payloadptr;
+    char* str_payload = (char*)context;
     printf("Message arrived\n");
     printf("     topic: %s\n", topicName);
     printf("   message: ");
     payloadptr = (char*) message->payload;
     for(i=0; i<message->payloadlen; i++) {
+        str_payload[i] = *payloadptr;
         putchar(*payloadptr++);
     }
     putchar('\n');
@@ -54,13 +57,16 @@ int main(int argc, char* argv[]) {
     int rc;
     int ch;
 
+    float sensorTemp = 0;
+    char str_payload[100]; // matches max size of payload in publisher
+
     MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
     opts.keepAliveInterval = 20;
     opts.cleansession = 1;
     opts.username = AUTHMETHOD;
     opts.password = AUTHTOKEN;
 
-    MQTTClient_setCallbacks(client, NULL, connlost, msgarrvd, delivered);
+    MQTTClient_setCallbacks(client, str_payload, connlost, msgarrvd, delivered);
     if ((rc = MQTTClient_connect(client, &opts)) != MQTTCLIENT_SUCCESS) {
         printf("Failed to connect, return code %d\n", rc);
         exit(-1);
@@ -71,6 +77,7 @@ int main(int argc, char* argv[]) {
 
     do {
         ch = getchar();
+	puts(str_payload);
     } while(ch!='Q' && ch != 'q');
     MQTTClient_disconnect(client, 10000);
     MQTTClient_destroy(&client);
