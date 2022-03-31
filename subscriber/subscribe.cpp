@@ -40,6 +40,7 @@ int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *m
         str_payload[i] = *payloadptr;
         putchar(*payloadptr++);
     }
+    str_payload[i] = 0;
     putchar('\n');
     MQTTClient_freeMessage(&message);
     MQTTClient_free(topicName);
@@ -51,6 +52,21 @@ void connlost(void *context, char *cause) {
     printf("     cause: %s\n", cause);
 }
 
+void parseJson(json_object * jobj) {
+    enum json_type type;
+    json_object_object_foreach(jobj, key, val) {
+    type = json_object_get_type(val);
+    switch (type) {
+        case json_type_double: printf("type: json_type_double, ");
+        printf("value: %f", json_object_get_double(val));
+        if(json_object_get_double(val) > 40){
+            printf("CPU temp is greater than 40");
+        }
+        break;
+    }
+    }
+}
+
 int main(int argc, char* argv[]) {
     MQTTClient client;
     MQTTClient_connectOptions opts = MQTTClient_connectOptions_initializer;
@@ -58,7 +74,7 @@ int main(int argc, char* argv[]) {
     int ch;
 
     float sensorTemp = 0;
-    char str_payload[100]; // matches max size of payload in publisher
+    char str_payload[100]; // same max length as publisher payload 
 
     MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
     opts.keepAliveInterval = 20;
@@ -75,9 +91,18 @@ int main(int argc, char* argv[]) {
            "Press Q<Enter> to quit\n\n", TOPIC, CLIENTID, QOS);
     MQTTClient_subscribe(client, TOPIC, QOS);
 
+    //char* string = "{ \"PI\" : 3.140000 }";
+    //printf("JSON string is: %s\n", string);
+    //json_object * jobj = json_tokener_parse(string);
+    //parseJson(jobj);
+
     do {
         ch = getchar();
 	puts(str_payload);
+        printf("CPUTemp is: ");
+        json_object * jobj = json_tokener_parse(str_payload);
+        parseJson(jobj);
+        printf("\n");
     } while(ch!='Q' && ch != 'q');
     MQTTClient_disconnect(client, 10000);
     MQTTClient_destroy(&client);

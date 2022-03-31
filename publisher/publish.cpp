@@ -89,7 +89,7 @@ void Publish::getTime(char *theTime){
 // helper function to generate a json payload from topic string and data string
 // data must first be converted to string form
 void Publish::generateJson(char* str_payload, const char* topic, char* data) {
-   sprintf(str_payload, "{\"d\":{\"%s\": %s }}", topic, data);
+   sprintf(str_payload, "{\"%s\": %s }}", topic, data);
 }
 
 int Publish::publishMessage(char* str_payload, const char* topic){
