@@ -6,12 +6,6 @@
 #include <json-c/json.h>
 #include <wiringPi.h>
 
-// added these libraries so getchar() can be used in the loop on a seperate thread
-//  without blocking the rest of the code
-#include <chrono>
-#include <thread>
-using namespace std::chrono_literals;
-
 
 #define ADDRESS     "tcp://192.168.1.14:1883"
 #define CLIENTID    "rpi2"
@@ -107,7 +101,7 @@ int main(int argc, char* argv[]) {
 
     MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
     opts.keepAliveInterval = 20;
-    opts.cleansession = 1;
+    opts.cleansession = 0;
     opts.username = AUTHMETHOD;
     opts.password = AUTHTOKEN;
 
@@ -136,6 +130,9 @@ int main(int argc, char* argv[]) {
 //        parseJson(jobj);
 //        printf("\n");
     } while(ch!='Q' && ch != 'q');
+
+    digitalWrite(LED_PIN, LOW); // turn off led before closing
+
     MQTTClient_disconnect(client, 10000);
     MQTTClient_destroy(&client);
     return rc;
