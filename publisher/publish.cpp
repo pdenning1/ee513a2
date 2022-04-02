@@ -32,6 +32,7 @@ using namespace exploringRPi;
 namespace ee513a2{
 
 Publish::Publish(){
+   begin = clock(); // set the program start time
    // setup client and connect to broker
    this->conn_opts = MQTTClient_connectOptions_initializer;
    this->will_opts = MQTTClient_willOptions_initializer; // adding LWT

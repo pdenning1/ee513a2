@@ -31,14 +31,16 @@ namespace ee513a2{
 
 class Publish{
 private:
-   MQTTClient client;
-   MQTTClient_connectOptions conn_opts;
-   MQTTClient_willOptions will_opts;
-   MQTTClient_message pubmsg;
-   MQTTClient_deliveryToken token;
-   ADXL345* theAdxl;
+    MQTTClient client;
+    MQTTClient_connectOptions conn_opts;
+    MQTTClient_willOptions will_opts;
+    MQTTClient_message pubmsg;
+    MQTTClient_deliveryToken token;
+    ADXL345* theAdxl;
 
-   char str_payload[100];
+    char str_payload[100];
+    clock_t begin;
+    clock_t sendTime;
 
     float getCPUTemperature();
     void getTime(char *theTime);
