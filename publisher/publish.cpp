@@ -44,7 +44,7 @@ Publish::Publish(){
    conn_opts.password = AUTHTOKEN;
    conn_opts.will = &will_opts;
    will_opts.topicName = TOPIC_TEMP;
-   will_opts.message = "{\"d\":{\"ee513/CPUTemp\": \"Client rpi1 lost connection\" }}";
+   will_opts.message = "{\"ee513/CPUTemp\": \"Client rpi1 lost connection\" }";
    will_opts.qos = QOS;
    int rc;
    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
@@ -56,6 +56,9 @@ Publish::Publish(){
    theAdxl = new ADXL345(1, 0x53);
    theAdxl->setResolution(ADXL345::NORMAL);
    theAdxl->setRange(ADXL345::PLUSMINUS_4_G);
+
+    //str_payload
+
 }
 
 Publish::~Publish(){
@@ -89,7 +92,9 @@ void Publish::getTime(char *theTime){
 // helper function to generate a json payload from topic string and data string
 // data must first be converted to string form
 void Publish::generateJson(char* str_payload, const char* topic, char* data) {
-   sprintf(str_payload, "{\"%s\": %s }}", topic, data);
+    //memset(str_payload, 0, 100); // set the pyload to all zeroes before filling with data
+    // otherwise garbage characters may be on end of string
+    sprintf(str_payload, "{\"%s\": %s }", topic, data);
 }
 
 int Publish::publishMessage(char* str_payload, const char* topic){
