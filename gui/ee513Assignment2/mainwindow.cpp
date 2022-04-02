@@ -93,6 +93,7 @@ int MainWindow::parseJSONData(QString str){
     QJsonObject obj = doc.object();
 
     // we need to handle it differently if we are using a wildcard (TOPIC_ACCL or TOPIC_ANGLE)
+    // as this involves multiple plots
     if(currentTopic.compare(TOPIC_ACCL) == 0){
         if(obj.keys().at(0).compare(TOPIC_ACCLX) == 0){
             this->newData = (float) obj[TOPIC_ACCLX].toDouble();
@@ -102,7 +103,7 @@ int MainWindow::parseJSONData(QString str){
             this->newData = (float) obj[TOPIC_ACCLY].toDouble();
             graph = 1;
         }
-        if(obj.keys().at(0).compare(TOPIC_ACCLX) == 0){
+        if(obj.keys().at(0).compare(TOPIC_ACCLZ) == 0){
             this->newData = (float) obj[TOPIC_ACCLZ].toDouble();
             graph = 2;
         }
@@ -133,7 +134,7 @@ void MainWindow::update(int graph){
     static QTime time(QTime::currentTime());
     double key = (time.elapsed()/1000.0) - connectedTime; // time elapsed since start of demo, in seconds
     ui->customPlot->graph(graph)->addData(key,newData);
-    ui->customPlot->graph(graph)->rescaleKeyAxis(true); // could cause problems?
+    ui->customPlot->graph(graph)->rescaleKeyAxis(true);
     ui->customPlot->replot();
     QString text = QString("Value added is %1").arg(this->newData);
     ui->outputEdit->setText(text);
