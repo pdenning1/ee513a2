@@ -9,10 +9,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->count = 50;
+
     this->time = 0;
     this->setWindowTitle("EE513 Assignment 2");
-    this->ui->customPlot->addGraph();
+
+    this->setupGraphs();
+
     this->ui->customPlot->yAxis->setLabel("");
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -23,13 +25,15 @@ MainWindow::MainWindow(QWidget *parent) :
                      this, SLOT(on_MQTTmessage(QString)));
     ::handle = this;
 
-
+    // ad the topics to the combo box
     this->ui->comboBoxTopic->addItem(TOPIC_TEMP);
     this->ui->comboBoxTopic->addItem(TOPIC_ACCLX);
     this->ui->comboBoxTopic->addItem(TOPIC_ACCLY);
     this->ui->comboBoxTopic->addItem(TOPIC_ACCLZ);
     this->ui->comboBoxTopic->addItem(TOPIC_PITCH);
     this->ui->comboBoxTopic->addItem(TOPIC_ROLL);
+    this->ui->comboBoxTopic->addItem(TOPIC_ACCL);
+    this->ui->comboBoxTopic->addItem(TOPIC_ANGLE);
 
     this->currentTopic = "";
 }
@@ -44,46 +48,92 @@ QString MainWindow::getAxisLabel(QString topic){
     if(topic.compare(TOPIC_TEMP) == 0){
         axisLabel = "Temperature (C)";
     }
-    if(topic.compare(TOPIC_ACCLX) == 0){
+    else if(topic.compare(TOPIC_ACCLX) == 0){
         axisLabel = "Acceleration-X";
     }
-    if(topic.compare(TOPIC_ACCLY) == 0){
+    else if(topic.compare(TOPIC_ACCLY) == 0){
         axisLabel = "Acceleration-Y ";
     }
-    if(topic.compare(TOPIC_ACCLZ) == 0){
+    else if(topic.compare(TOPIC_ACCLZ) == 0){
         axisLabel = "Acceleration-Z";
     }
-    if(topic.compare(TOPIC_PITCH) == 0){
+    else if(topic.compare(TOPIC_PITCH) == 0){
         axisLabel = "Pitch (degrees)";
     }
-    if(topic.compare(TOPIC_ROLL) == 0){
+    else if(topic.compare(TOPIC_ROLL) == 0){
         axisLabel = "Roll (degrees)";
+    }
+    else if(topic.compare(TOPIC_ACCL) == 0){
+        axisLabel = "Acceleration-any direction";
+    }
+    else if(topic.compare(TOPIC_ANGLE) == 0){
+        axisLabel = "Roll angle/Pitch angle (degrees)";
     }
 
     return axisLabel;
 }
 
+// Helper function to set up the 3 qcustomplot graphs
+void MainWindow::setupGraphs(){
+    this->ui->customPlot->addGraph();
+    this->ui->customPlot->graph(0)->setPen(QPen(Qt::blue));
+    this->ui->customPlot->addGraph();
+    this->ui->customPlot->graph(1)->setPen(QPen(Qt::red));
+    this->ui->customPlot->addGraph();
+    this->ui->customPlot->graph(2)->setPen(QPen(Qt::green));
+}
+
+
+// Parses the json object. Returns an int indicating which graph# to update
 int MainWindow::parseJSONData(QString str){
+    int graph = 0;
+
     QJsonParseError *jsonError = new QJsonParseError();
     QJsonDocument doc = QJsonDocument::fromJson(str.toUtf8(), jsonError);
     QJsonObject obj = doc.object();
-    //QJsonValue jTemp = obj.value(QString("ee513/CPUTemp"));
-    //this->temp = (float) jTemp.toDouble();
-    this->newData = (float) obj[currentTopic].toDouble();
+
+    // we need to handle it differently if we are using a wildcard (TOPIC_ACCL or TOPIC_ANGLE)
+    if(currentTopic.compare(TOPIC_ACCL) == 0){
+        if(obj.keys().at(0).compare(TOPIC_ACCLX) == 0){
+            this->newData = (float) obj[TOPIC_ACCLX].toDouble();
+            graph = 0;
+        }
+        if(obj.keys().at(0).compare(TOPIC_ACCLY) == 0){
+            this->newData = (float) obj[TOPIC_ACCLY].toDouble();
+            graph = 1;
+        }
+        if(obj.keys().at(0).compare(TOPIC_ACCLX) == 0){
+            this->newData = (float) obj[TOPIC_ACCLZ].toDouble();
+            graph = 2;
+        }
+    }
+    else if(currentTopic.compare(TOPIC_ANGLE) == 0){
+        if(obj.keys().at(0).compare(TOPIC_ROLL) == 0){
+            this->newData = (float) obj[TOPIC_ROLL].toDouble();
+            graph = 0;
+        }
+        if(obj.keys().at(0).compare(TOPIC_PITCH) == 0){
+            this->newData = (float) obj[TOPIC_PITCH].toDouble();
+            graph = 1;
+        }
+    }
+    else {
+        this->newData = (float) obj[currentTopic].toDouble();
+    }
     qDebug() << "Value received " << newData;
 
     qDebug() << jsonError->errorString();
     delete(jsonError);
 
-    return 0;
+    return graph;
 }
 
-void MainWindow::update(){
+void MainWindow::update(int graph){
     // For more help on real-time plots, see: http://www.qcustomplot.com/index.php/demos/realtimedatademo
     static QTime time(QTime::currentTime());
     double key = (time.elapsed()/1000.0) - connectedTime; // time elapsed since start of demo, in seconds
-    ui->customPlot->graph(0)->addData(key,newData);
-    ui->customPlot->graph(0)->rescaleKeyAxis(true);
+    ui->customPlot->graph(graph)->addData(key,newData);
+    ui->customPlot->graph(graph)->rescaleKeyAxis(true); // could cause problems?
     ui->customPlot->replot();
     QString text = QString("Value added is %1").arg(this->newData);
     ui->outputEdit->setText(text);
@@ -120,7 +170,7 @@ void MainWindow::on_connectButton_clicked()
     // set the graph axis label to match the current topic
     this->ui->customPlot->yAxis->setLabel(getAxisLabel(currentTopic));
     this->ui->customPlot->clearGraphs();
-    this->ui->customPlot->addGraph();
+    this->setupGraphs();
     this->ui->customPlot->replot();
 
     ui->outputEdit->setText("Waiting for message from publisher...");
@@ -160,8 +210,8 @@ void MainWindow::on_MQTTmessage(QString payload){
     ui->outputText->ensureCursorVisible();
 
     //ADD YOUR CODE HERE
-    parseJSONData(payload);
-    this->update();
+    int graph = parseJSONData(payload);
+    this->update(graph);
 }
 
 void connlost(void *context, char *cause) {

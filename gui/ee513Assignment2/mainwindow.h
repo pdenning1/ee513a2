@@ -20,8 +20,11 @@
 #define TOPIC_ACCLX      "ee513/Accl/X"
 #define TOPIC_ACCLY      "ee513/Accl/Y"
 #define TOPIC_ACCLZ      "ee513/Accl/Z"
-#define TOPIC_ROLL      "ee513/Roll"
-#define TOPIC_PITCH     "ee513/Pitch"
+#define TOPIC_ROLL      "ee513/Roll/Angle"
+#define TOPIC_PITCH     "ee513/Pitch/Angle"
+
+#define TOPIC_ANGLE "ee513/+/Angle"
+#define TOPIC_ACCL "ee513/Accl/#"
 
 #define TOPIC_TEST    "ee513/Test"
 
@@ -45,9 +48,11 @@ signals:
 
 private:
     Ui::MainWindow *ui;
-    void update();
-    int count, time;
+    void update(int graph);
+    int time;
     float newData;
+    float accl[3];
+    float angl[2];
     double connectedTime;
     QString currentTopic;
     MQTTClient client;
@@ -55,6 +60,7 @@ private:
 
     int parseJSONData(QString str);
     QString getAxisLabel(QString topic);
+    void setupGraphs();
 
     friend void delivered(void *context, MQTTClient_deliveryToken dt);
     friend int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
