@@ -11,18 +11,18 @@
 #define CLIENTID    "rpi2"
 #define AUTHMETHOD  "pdenn"
 #define AUTHTOKEN   "123456"
-#define TOPIC       "ee513/Roll"
+#define TOPIC       "ee513/Roll/Angle"
 #define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
 
 #define TOPIC_TEMP      "ee513/CPUTemp"
 #define TOPIC_TIME	"ee513/Time"
-#define TOPIC_ACCLX      "ee513/AcclX"
-#define TOPIC_ACCLY      "ee513/AcclY"
-#define TOPIC_ACCLZ      "ee513/AcclZ"
-#define TOPIC_ROLL      "ee513/Roll"
-#define TOPIC_PITCH     "ee513/Pitch"
+#define TOPIC_ACCLX      "ee513/Accl/X"
+#define TOPIC_ACCLY      "ee513/Accl/Y"
+#define TOPIC_ACCLZ      "ee513/Accl/Z"
+#define TOPIC_ROLL      "ee513/Roll/Angle"
+#define TOPIC_PITCH     "ee513/Pitch/Angle"
 
 #define LED_PIN 	0     // wiringPi pin 0 is GPIO17  http://wiringpi.com/pins/
 
