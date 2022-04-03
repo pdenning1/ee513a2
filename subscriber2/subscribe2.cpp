@@ -9,7 +9,7 @@
 
 
 #define ADDRESS     "tcp://192.168.1.14:1883"
-#define CLIENTID    "rpi2"
+#define CLIENTID    "rpi3"
 #define AUTHMETHOD  "pdenn"
 #define AUTHTOKEN   "123456"
 #define TOPIC       "ee513/CPUTemp"
@@ -17,7 +17,7 @@
 #define QOS         1
 #define TIMEOUT     10000L
 
-#define ALARM_TEMP 40 // define the temperature at which the led should flash
+#define ALARM_TEMP 50 // define the temperature at which the led should flash
 
 #define TOPIC_TEMP      "ee513/CPUTemp"
 #define TOPIC_TIME	"ee513/Time"
@@ -78,7 +78,7 @@ int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *m
     MQTTClient_free(topicName);
 
     json_object * jobj = json_tokener_parse(str_payload);
-    parseJson(jobj, alarm);
+    parseJson(jobj);
 
     return 1;
 }
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
 
     MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
     opts.keepAliveInterval = 20;
-    opts.cleansession = 0;
+    opts.cleansession = 1;
     opts.username = AUTHMETHOD;
     opts.password = AUTHTOKEN;
 
@@ -121,9 +121,12 @@ int main(int argc, char* argv[]) {
     do {
 
         ch = getchar();
-	    puts(str_payload);
 
     } while(ch!='Q' && ch != 'q');
+
+    printf("Final msessage received: ");
+    puts(str_payload);
+    printf("\n");
 
     digitalWrite(LED_PIN, LOW); // turn off led before closing
 

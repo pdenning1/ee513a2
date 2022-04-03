@@ -113,9 +113,11 @@ int main(int argc, char* argv[]) {
 
     do {
         ch = getchar();
-	    puts(str_payload);
-
     } while(ch!='Q' && ch != 'q');
+
+    printf("Final message received: ");
+    puts(str_payload);
+    printf("\n");
 
     digitalWrite(LED_PIN, LOW); // turn off led before closing
 
