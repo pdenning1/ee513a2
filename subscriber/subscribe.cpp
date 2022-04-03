@@ -12,9 +12,11 @@
 #define AUTHMETHOD  "pdenn"
 #define AUTHTOKEN   "123456"
 #define TOPIC       "ee513/Roll/Angle"
-#define PAYLOAD     "Hello World!"
+//#define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
+
+#define ALARM_ROLL 30
 
 #define TOPIC_TEMP      "ee513/CPUTemp"
 #define TOPIC_TIME	"ee513/Time"
@@ -35,8 +37,8 @@ void parseJson(json_object * jobj) {
     switch (type) {
         case json_type_double: printf("type: json_type_double, ");
         printf("value: %f\n", json_object_get_double(val));
-        if(json_object_get_double(val) > 20){
-            printf("Roll is greater than 20\n");
+        if(json_object_get_double(val) > ALARM_ROLL){
+            printf("Roll is greater than %d\n", ALARM_ROLL);
             digitalWrite(LED_PIN, HIGH);
         }
         else {
@@ -80,12 +82,6 @@ void connlost(void *context, char *cause) {
     printf("     cause: %s\n", cause);
 }
 
-//void onEnter(void* ch) {
-//    int* chr = (int*)ch;
-//    while(true) {
-//        *chr = getchar();
-//    }
-//}
 
 int main(int argc, char* argv[]) {
     MQTTClient client;
@@ -114,21 +110,11 @@ int main(int argc, char* argv[]) {
            "Press Q<Enter> to quit\n\n", TOPIC, CLIENTID, QOS);
     MQTTClient_subscribe(client, TOPIC, QOS);
 
-    //char* string = "{ \"PI\" : 3.140000 }";
-    //printf("JSON string is: %s\n", string);
-    //json_object * jobj = json_tokener_parse(string);
-    //parseJson(jobj);
-
-    //std::thread keyBoardCommands(onEnter(ch));
 
     do {
         ch = getchar();
-        //std::this_thread::sleep_for(16ms); // allow keyBoardcommands to run for a bit
-	puts(str_payload);
-//        printf("CPUTemp is: ");
-//        json_object * jobj = json_tokener_parse(str_payload);
-//        parseJson(jobj);
-//        printf("\n");
+	    puts(str_payload);
+
     } while(ch!='Q' && ch != 'q');
 
     digitalWrite(LED_PIN, LOW); // turn off led before closing
