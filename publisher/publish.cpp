@@ -16,7 +16,6 @@
 namespace ee513a2{
 
 Publish::Publish(){
-   begin = clock(); // set the program start time
    // setup client and connect to broker
    this->conn_opts = MQTTClient_connectOptions_initializer;
    this->will_opts = MQTTClient_willOptions_initializer; // adding LWT
@@ -41,9 +40,6 @@ Publish::Publish(){
    theAdxl = new ADXL345(1, 0x53);
    theAdxl->setResolution(ADXL345::NORMAL);
    theAdxl->setRange(ADXL345::PLUSMINUS_4_G);
-
-    //str_payload
-
 }
 
 Publish::~Publish(){
