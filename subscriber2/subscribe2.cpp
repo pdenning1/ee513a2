@@ -5,8 +5,6 @@
 
 #include <json-c/json.h>
 #include <wiringPi.h>
-//#include <pthread.h>
-
 
 #define ADDRESS     "tcp://192.168.1.14:1883"
 #define CLIENTID    "rpi3"
