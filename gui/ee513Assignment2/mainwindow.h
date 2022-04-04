@@ -49,10 +49,8 @@ signals:
 private:
     Ui::MainWindow *ui;
     void update(int graph);
-    int time;
+
     float newData;
-    float accl[3];
-    float angl[2];
     double connectedTime;
     QString currentTopic;
     MQTTClient client;

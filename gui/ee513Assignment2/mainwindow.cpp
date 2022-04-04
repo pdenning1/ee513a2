@@ -10,7 +10,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->time = 0;
     this->setWindowTitle("EE513 Assignment 2");
 
     this->setupGraphs();
