@@ -1,15 +1,4 @@
 // // Based on the Paho C code example from www.eclipse.orgpaho
-// #include <iostream>
-// #include <sstream>
-// #include <fstream>
-// #include <string.h>
-// #include <time.h>
-// #include <MQTTClient.h>
-// #include "ADXL345.h"
-// #define  CPU_TEMP "/sys/class/thermal/thermal_zone0/temp"
-//using namespace std;
-//using namespace exploringRPi;
-
 
 #include "publish.h"
 
