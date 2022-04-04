@@ -5,7 +5,7 @@
 
 #include <json-c/json.h>
 #include <wiringPi.h>
-#include <pthread.h>
+//#include <pthread.h>
 
 
 #define ADDRESS     "tcp://192.168.1.14:1883"
@@ -13,26 +13,15 @@
 #define AUTHMETHOD  "pdenn"
 #define AUTHTOKEN   "123456"
 #define TOPIC       "ee513/CPUTemp"
-//#define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
 
 #define ALARM_TEMP 50 // define the temperature at which the led should flash
-
-#define TOPIC_TEMP      "ee513/CPUTemp"
-#define TOPIC_TIME	"ee513/Time"
-#define TOPIC_ACCLX      "ee513/Accl/X"
-#define TOPIC_ACCLY      "ee513/Accl/Y"
-#define TOPIC_ACCLZ      "ee513/Accl/Z"
-#define TOPIC_ROLL      "ee513/Roll/Angle"
-#define TOPIC_PITCH     "ee513/Pitch/Angle"
-
 #define LED_PIN 	0     // wiringPi pin 0 is GPIO17  http://wiringpi.com/pins/
 
 volatile MQTTClient_deliveryToken deliveredtoken;
 
-
-
+// parse the json payload and set the LED GPIO accordingly 
 void parseJson(json_object * jobj) {
     enum json_type type;
     json_object_object_foreach(jobj, key, val) {

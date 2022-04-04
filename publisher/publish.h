@@ -39,8 +39,8 @@ private:
     ADXL345* theAdxl;
 
     char str_payload[100];
-    clock_t begin;
-    clock_t sendTime;
+    // clock_t begin;
+    // clock_t sendTime;
 
     float getCPUTemperature();
     void getTime(char *theTime);
